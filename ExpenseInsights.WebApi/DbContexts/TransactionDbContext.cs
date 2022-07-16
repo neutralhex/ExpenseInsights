@@ -5,7 +5,7 @@ namespace ExpenseInsights.WebApi.DbContexts
 {
     public class TransactionDbContext : DbContext
     {
-        public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<Transaction> Transactions { get; set; } = null!;
         public string DbPath { get; set; }
 
         public TransactionDbContext(DbContextOptions<TransactionDbContext> options)
@@ -18,5 +18,10 @@ namespace ExpenseInsights.WebApi.DbContexts
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             => options.UseSqlite($"Data Source={DbPath}");
+
+        protected override void OnModelCreating(ModelBuilder builder)
+            => builder.Entity<Transaction>()
+                .HasIndex(t => t.IdempotencyKey)
+                .IsUnique();
     }
 }
