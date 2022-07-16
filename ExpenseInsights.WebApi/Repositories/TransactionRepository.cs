@@ -1,5 +1,6 @@
 ﻿using ExpenseInsights.WebApi.DbContexts;
 using ExpenseInsights.WebApi.Models;
+using System.Text.Json;
 
 namespace ExpenseInsights.WebApi.Repositories
 {
@@ -12,7 +13,6 @@ namespace ExpenseInsights.WebApi.Repositories
         {
             _logger = logger;
             _db = dbContext;
-            _logger.LogInformation("Database path: {Path}", _db.DbPath);
         }
 
         public void Create(Transaction transaction)
@@ -24,7 +24,8 @@ namespace ExpenseInsights.WebApi.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError("Unable to create Transaction in Database", ex);
+                _db.Remove(transaction);
+                _logger.LogError("Unable to create Transaction in Database", transaction);
             }
         }
 

@@ -1,6 +1,8 @@
 ﻿using ExpenseInsights.WebApi.Models;
 using ExpenseInsights.WebApi.Repositories;
 using System.Globalization;
+using System.Text;
+using System.Text.Json;
 
 namespace ExpenseInsights.WebApi.Services
 {
@@ -41,31 +43,47 @@ namespace ExpenseInsights.WebApi.Services
 
         public bool Process(string fileName)
         {
+            var lineNum = 0;
+
             try
             {
                 var fileContents = File.ReadAllLines(fileName);
+
                 foreach (var line in fileContents)
                 {
+                    lineNum++;
                     if (!line.StartsWith("HIST"))
                         continue;
 
                     var parts = line.Split(",");
+
                     // TODO: Make this more robust
-                    _repository.Create(new Transaction
+                    var date = DateTime.ParseExact(parts[1], "yyyyMMdd", CultureInfo.InvariantCulture);
+                    var amount = Math.Abs(double.Parse(parts[3], CultureInfo.InvariantCulture));
+                    var category = double.Parse(parts[3], CultureInfo.InvariantCulture) < 0 ? TransactionCategory.Out : TransactionCategory.In;
+                    var vendor = parts[5];
+                    var detail = parts[4];
+
+                    var transaction = new Transaction
                     {
-                        Time = DateTime.ParseExact(parts[1], "yyyyMMdd", CultureInfo.InvariantCulture),
-                        Amount = Math.Abs(double.Parse(parts[3], CultureInfo.InvariantCulture)),
-                        Category = double.Parse(parts[3], CultureInfo.InvariantCulture) < 0 ? TransactionCategory.Out : TransactionCategory.In,
-                        Vendor = parts[5],
-                        Detail = parts[4]
-                    });
+                        Date = date,
+                        Amount = amount,
+                        Category = category,
+                        Vendor = vendor,
+                        Detail = detail
+                    };
+
+                    // find a better way to not mutate state after object creation
+                    transaction.IdempotencyKey = GenerateHash(transaction);
+                    
+                    _repository.Create(transaction);
                 }
 
                 DeleteStatement(fileName);
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error processing file.", ex);
+                _logger.LogError($"Error processing file on line {lineNum}");
                 return false;
             }
 
@@ -80,6 +98,14 @@ namespace ExpenseInsights.WebApi.Services
             }
 
             return File.Exists(fileName); //probably don't need this
+        }
+
+        private static string GenerateHash(Transaction transaction)
+        {
+            using var md5 = System.Security.Cryptography.MD5.Create();
+            byte[] inputBytes = Encoding.ASCII.GetBytes(JsonSerializer.Serialize(transaction));
+            byte[] hashBytes = md5.ComputeHash(inputBytes);
+            return Convert.ToBase64String(hashBytes);
         }
     }
 }
