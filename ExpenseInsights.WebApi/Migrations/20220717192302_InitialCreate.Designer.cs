@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExpenseInsights.WebApi.Migrations
 {
     [DbContext(typeof(TransactionDbContext))]
-    [Migration("20220716002844_InitialCreate")]
+    [Migration("20220717192302_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -47,9 +47,6 @@ namespace ExpenseInsights.WebApi.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("TransactionId");
-
-                    b.HasIndex("IdempotencyKey")
-                        .IsUnique();
 
                     b.ToTable("Transactions");
                 });

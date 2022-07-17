@@ -46,9 +46,6 @@ namespace ExpenseInsights.WebApi.Migrations
 
                     b.HasKey("TransactionId");
 
-                    b.HasIndex("IdempotencyKey")
-                        .IsUnique();
-
                     b.ToTable("Transactions");
                 });
 #pragma warning restore 612, 618

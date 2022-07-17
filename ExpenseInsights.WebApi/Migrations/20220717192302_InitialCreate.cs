@@ -26,12 +26,6 @@ namespace ExpenseInsights.WebApi.Migrations
                 {
                     table.PrimaryKey("PK_Transactions", x => x.TransactionId);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Transactions_IdempotencyKey",
-                table: "Transactions",
-                column: "IdempotencyKey",
-                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

@@ -18,10 +18,5 @@ namespace ExpenseInsights.WebApi.DbContexts
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             => options.UseSqlite($"Data Source={DbPath}");
-
-        protected override void OnModelCreating(ModelBuilder builder)
-            => builder.Entity<Transaction>()
-                .HasIndex(t => t.IdempotencyKey)
-                .IsUnique();
     }
 }

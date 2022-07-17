@@ -24,7 +24,6 @@ namespace ExpenseInsights.WebApi.Repositories
             }
             catch (Exception ex)
             {
-                _db.Remove(transaction);
                 _logger.LogError("Unable to create Transaction in Database", transaction);
             }
         }

@@ -43,15 +43,12 @@ namespace ExpenseInsights.WebApi.Services
 
         public bool Process(string fileName)
         {
-            var lineNum = 0;
-
             try
             {
                 var fileContents = File.ReadAllLines(fileName);
 
                 foreach (var line in fileContents)
                 {
-                    lineNum++;
                     if (!line.StartsWith("HIST"))
                         continue;
 
@@ -83,7 +80,7 @@ namespace ExpenseInsights.WebApi.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error processing file on line {lineNum}");
+                _logger.LogError($"Error processing file", ex);
                 return false;
             }
 
