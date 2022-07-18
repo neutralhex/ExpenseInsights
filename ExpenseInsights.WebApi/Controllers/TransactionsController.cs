@@ -9,24 +9,30 @@ namespace ExpenseInsights.WebApi.Controllers
     [ApiController]
     public class TransactionsController : ControllerBase
     {
-        private readonly IStatementProcessor _statementProcessor;
+        private readonly IStatementService _statementService;
 
-        public TransactionsController(IStatementProcessor statementProcessor)
+        public TransactionsController(IStatementService statementService)
         {
-            _statementProcessor = statementProcessor;
+            _statementService = statementService;
         }
 
         [HttpPost]
         [Route("process")]
         public IActionResult ProcessStatement(IFormFile statement)
         {
-            if (!_statementProcessor.Upload(statement))
+            if (!_statementService.Upload(statement))
                 return BadRequest($"Error uploading file.");
 
-            if (!_statementProcessor.Process(statement.FileName))
+            if (!_statementService.Process(statement.FileName))
                 return BadRequest($"Error processing file.");
 
             return Ok("File processed");
+        }
+
+        [HttpGet]
+        public IActionResult GetAllTransactions()
+        {
+            return Ok(_statementService.GetAllTransactions());
         }
     }
 }
